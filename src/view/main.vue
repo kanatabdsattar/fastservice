@@ -49,41 +49,20 @@
         </table>
       </div>
       <div class="main-footer">
-        All rights reserved <br />
+        All rights reserved <br />        
         Fast service 2021
       </div>
     </div>
     <div v-if="showOption" class="main-option">
       <div v-if="apiResponse">
         <div v-for="(delivery, index) in apiResponse" :key="index">
-          <!-- Check if the delivery type is "pick up" -->
-          <template v-if="delivery.type === 'pickup'">
-            <pickUp
-              @chosenDelivery = "chosenType"
-              :delivery-city="delivery.city"
-              :delivery-type="delivery.type"
-              :is-available="delivery.available"
-              :delivery-price="delivery.price"
-            />
-          </template>
-          <template v-if="delivery.type === 'courier'">
-            <courier
-              @chosenDelivery2 = "chosenType2"
-              :delivery-city="delivery.city"
-              :delivery-type="delivery.type"
-              :is-available="delivery.available"
-              :delivery-price="delivery.price"
-            />
-          </template>
-          <template v-if="delivery.type === 'post'">
-            <post
-               @chosenDelivery = "chosenType3"
-              :delivery-city="delivery.city"
-              :delivery-type="delivery.type"
-              :is-available="delivery.available"
-              :delivery-price="delivery.price"
-            />
-          </template>
+          <deliver
+          :delivery-city="delivery.city"
+          :delivery-type="delivery.type"
+          :is-available="delivery.available"
+          :delivery-price="delivery.price"
+          :logo-path="getLogoPath(delivery.type)"
+        />
         </div>
       </div>
       <div v-else-if="apiError">
@@ -105,10 +84,8 @@
 </template>
 
 <script setup lang="ts">
-import post from '../components/post.vue';
 import close from '../icons/closeIcon.vue';
-import courier from '../components/courier.vue'
-import pickUp from '../components/pickUp.vue';
+import deliver from '../components/deliver.vue';
 import logo from '../icons/logo.vue';
 import Image from '../icons/track.vue';
 import Road from '../icons/road.vue';
@@ -138,24 +115,6 @@ const chooseDelivery = () => {
   }
 };
 
-const isDisabled1 = ref(false);
-const isDisabled2 = ref(false);
-const isDisabled3 = ref(false);
-const chosenType = () => { 
-  isDisabled1.value = !isDisabled1.value;
-  isDisabled2.value = true;
-  isDisabled3.value = true;
-}
-const chosenType2 = () => { 
-  isDisabled1.value = true;
-  isDisabled2.value = !isDisabled2.value;
-  isDisabled3.value = true;
-}
-const chosenType3 = () => { 
-  isDisabled1.value = true;
-  isDisabled2.value = true;
-  isDisabled3.value = !isDisabled3.value;
-}
 const fetchData = () => {
   apiError.value = null;
   apiResponse.value = null;
@@ -181,6 +140,15 @@ const clearSearch = () => {
 }
 const setCity = (city:string) => {
   cityName.value = city;
+};
+const getLogoPath = (type) => {
+  const logoPaths = {
+    pickup: '/pickup.svg',
+    courier: '/courier.svg',
+    post: '/post.svg',
+  };
+
+  return logoPaths[type] || '/default-logo.svg';
 };
 </script>
 

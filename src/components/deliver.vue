@@ -1,11 +1,11 @@
 <template>
-    <div class="main-block" @click="chosenDelivery" :class="{ 'disabled': !isAvailable }" >
+    <div class="main-block" @click="chosenDelivery" :class="{ 'disabled': !isAvailable }">
         <div class="main-info">
-            <p class="header">Pick up</p>
+            <p class="header">{{ deliveryType }}</p>
             <p class="price">{{ deliveryPrice.toFixed(2)}}$</p>
         </div>
         <div class="main-image">
-            <logo class="icon"/>
+            <img :src="logoPath" class="icon" alt="Delivery Logo" />
         </div>
         <div v-show="visible" class="chosen-type">
             <check/>
@@ -14,15 +14,16 @@
 </template>
 
 <script setup lang="ts">
-import logo from '../icons/pickUpLogo.vue';
 import check from '../icons/check.vue';
-import { ref,defineEmits,defineProps  } from "vue";
+import { ref,defineEmits } from "vue";
 const  emit  = defineEmits(['chosenDelivery']);
+
 const props = defineProps({
     deliveryCity: String,
     deliveryType: String,
     isAvailable: Boolean,
     deliveryPrice: Number,
+    logoPath: String,
 });
 const visible = ref(false)
 const chosenDelivery = () => {
@@ -39,15 +40,14 @@ const chosenDelivery = () => {
     justify-content: space-between;
     border-radius: 22px;
     border: 1px solid #E9F0EB;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+}
+.icon{
+    width: 80%;
 }
 .disabled {
   opacity: 0.6; 
   pointer-events: none; 
-}
-
-.icon{
-    width: 80%;
 }
 .header{
     font-size: 28px;
@@ -63,9 +63,9 @@ const chosenDelivery = () => {
     padding: 15px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     gap: 10px;
     align-items: flex-start;
+    justify-content: space-between;
 }
 .chosen-type{
     background: linear-gradient(310deg, #65B3E4 23.89%, rgba(255, 255, 255, 0.00) 81.27%);
