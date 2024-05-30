@@ -1,8 +1,8 @@
 <template>
     <div class="main-block" @click="chosenDelivery" :class="{ 'disabled': !isAvailable }">
         <div class="main-info">
-            <p class="header">{{ deliveryType }}</p>
-            <p class="price">{{ deliveryPrice.toFixed(2)}}$</p>
+            <p class="header">{{ props.deliveryType }}</p>
+            <p class="price">{{ props.deliveryPrice.toFixed(2)}}$</p>
         </div>
         <div class="main-image">
             <img :src="logoPath" class="icon" alt="Delivery Logo" />
@@ -19,11 +19,26 @@ import { ref,defineEmits } from "vue";
 const  emit  = defineEmits(['chosenDelivery']);
 
 const props = defineProps({
-    deliveryCity: String,
-    deliveryType: String,
-    isAvailable: Boolean,
-    deliveryPrice: Number,
-    logoPath: String,
+    deliveryCity: {
+        type: String,
+        default: ''
+    },
+    deliveryType: {
+        type: String,
+        default: ''
+    },
+    isAvailable: {
+        type: Boolean,
+        default: false
+    },
+    deliveryPrice: {
+        type: Number,
+        default: 0
+    },
+    logoPath: {
+        type: String,
+        default: ''
+    },
 });
 const visible = ref(false)
 const chosenDelivery = () => {

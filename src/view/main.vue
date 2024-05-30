@@ -1,101 +1,13 @@
-<template>
-  <div class="container">
-  <div class="main">
-    <div class="main-info">
-      <div class="main-logo">
-        <logo class="main-icon" />
-        <h3>FastService</h3>
-      </div>
-      <div class="main-cost">
-        <p class="big-text">Delivery cost</p>
-        <p class="small-text">Enter name of the city to count delivery cost</p>
-      </div>
-      <div class="main-search">
-        <form action="" class="input-form">
-          <input
-            type="text"
-            v-model="cityName"
-            placeholder="Enter the name of the city"
-          />
-          <div v-if="closeSearch" class="submit" @click="chooseDelivery">ENTER</div>
-          <div v-else class="close" @click="clearSearch">
-            <close/>
-          </div>
-        </form>
-      </div>
-      <div class="main-list">
-        <p class="small-text">Most popular cities</p>
-        <table style="width: 100%">
-          <tr>
-            <td  @click="setCity('Nur - Sultan')">Nur - Sultan</td>
-            <td  @click="setCity('Aktau')">Aktau</td>
-          </tr>
-          <tr>
-            <td @click="setCity('Almaty')">Almaty</td>
-            <td @click="setCity('Karaganda')">Karaganda</td>
-          </tr>
-          <tr>
-            <td @click="setCity('Shymkent')">Shymkent</td>
-            <td @click="setCity('Kentau')">Kentau</td>
-          </tr>
-          <tr>
-            <td @click="setCity('Atyrau')">Atyrau</td>
-            <td @click="setCity('London')">London</td>
-          </tr>
-          <tr>
-            <td @click="setCity('Aktau')">Aktau</td>
-            <td @click="setCity('Pavlodar')">Pavlodar</td>
-          </tr>
-        </table>
-      </div>
-      <div class="main-footer">
-        All rights reserved <br />        
-        Fast service 2021
-      </div>
-    </div>
-    <div v-if="showOption" class="main-option">
-      <div v-if="apiResponse">
-        <div v-for="(delivery, index) in apiResponse" :key="index">
-          <deliver
-          :delivery-city="delivery.city"
-          :delivery-type="delivery.type"
-          :is-available="delivery.available"
-          :delivery-price="delivery.price"
-          :logo-path="getLogoPath(delivery.type)"
-        />
-        </div>
-      </div>
-      <div v-else-if="apiError">
-        <h2>Error:</h2>
-        <div>{{ apiError }}</div>
-      </div>
-    </div>
-    <div v-else class="main-image">
-      <Image class="image" />
-      <Road class="road" />
-      <Lines class="line" />
-    </div>
-  </div>
-  <footer>
-    All rights reserved <br />
-        Fast service 2021
-  </footer>
-  </div>
-</template>
-
 <script setup lang="ts">
-import close from '../icons/closeIcon.vue';
-import deliver from '../components/deliver.vue';
-import logo from '../icons/logo.vue';
-import Image from '../icons/track.vue';
-import Road from '../icons/road.vue';
-import Lines from '../icons/lines.vue';
-import { ref } from 'vue';
-
-import axios from 'axios';
-
-const apiUrl = 'https://test-frontend.stage.mechta.market/delivery/check';
-const cityName = ref('');
+import close from "../icons/closeIcon.vue";
+import deliver from "../components/deliver.vue";
+import banner from "../components/banner.vue";
+import footerIcons from "../components/footer-icons.vue";
+import { ref, computed } from "vue";
+import axios from "axios";
+const envUrl = import.meta.env.VITE_APP_API_URL
+const apiUrl = `${envUrl}/check`;
+const cityName = ref("");
 interface Delivery {
   city: String;
   type: String;
@@ -118,8 +30,9 @@ const chooseDelivery = () => {
 const fetchData = () => {
   apiError.value = null;
   apiResponse.value = null;
+  const cityQuery = encodeURIComponent(cityName.value.toLowerCase().replace(/\s+/g, ''));
   const params = {
-    search: cityName.value.toLowerCase(),
+    search: cityQuery,
   };
 
   axios
@@ -131,32 +44,189 @@ const fetchData = () => {
       apiError.value = error;
     });
 };
-const closeSearch = ref(true)
+const closeSearch = ref(true);
 const clearSearch = () => {
-  cityName.value = '';
+  cityName.value = "";
   showOption.value = false;
   apiResponse.value = null;
+  apiError.value = null;
   closeSearch.value = !closeSearch.value;
-}
-const setCity = (city:string) => {
-  cityName.value = city;
 };
-const getLogoPath = (type) => {
-  const logoPaths = {
-    pickup: '/pickup.svg',
-    courier: '/courier.svg',
-    post: '/post.svg',
+const setCity = (city: string) => {
+  cityName.value = city;
+  filteredCities.value = [];
+};
+type LogoType = 'pickup' | 'courier' | 'post';
+
+const getLogoPath = (type: LogoType): string => {
+  const logoPaths: { [key in LogoType]: string } = {
+    pickup: "/pickup.svg",
+    courier: "/courier.svg",
+    post: "/post.svg",
   };
 
-  return logoPaths[type] || '/default-logo.svg';
+  return logoPaths[type] || "/default-logo.svg";
 };
+
+interface City {
+  name: string;
+  alias: string;
+}
+const cities =ref<City[]>([
+  { name: "Nur - Sultan", alias: "nur-sultan" },
+  { name: "Aktau", alias: "aktau" },
+  { name: "Almaty", alias: "almaty" },
+  { name: "Karaganda", alias: "karaganda" },
+  { name: "Shymkent", alias: "shymkent" },
+  { name: "Kentau", alias: "kentau" },
+  { name: "Aitie", alias: "aitie" },
+  { name: "Pavlodar", alias: "pavlodar" },
+]);
+const filteredCities = ref<City[]>([]);
+const filterCities = () => {
+  const searchValue = cityName.value.toLowerCase();
+  if (searchValue.length > 0) {
+    filteredCities.value = cities.value.filter((city) =>
+      city.name.toLowerCase().includes(searchValue)
+    );
+  } else {
+    filteredCities.value = [];
+  }
+};
+const cityPairs = computed(() => {
+  let pairs = [];
+  for (let i = 0; i < cities.value.length; i += 2) {
+    pairs.push(cities.value.slice(i, i + 2));
+  }
+  return pairs;
+});
 </script>
+<template>
+  <div class="container">
+    <div class="main">
+      <div class="main-info">
+        <div class="flex w-full items-center mb-8 font-bold text-xl gap-2 mt-2">
+          <logo class="h-max-10 w-max-10" />
+          <h3 class="text-2xl">FastService</h3>
+        </div>
+        <div class="flex flex-col gap-2 mb-8">
+          <p class="text-3xl flex justify-start font-bold">Delivery cost</p>
+          <p class="text-lg flex justify-start text-gray-500">
+            Enter name of the city to count delivery cost
+          </p>
+        </div>
+        <div class="mb-8">
+          <form action="" class="flex lg:justify-start justify-center items-center relative">
+            <input
+              type="text"
+              v-model="cityName"
+              @input="filterCities"
+              placeholder="Enter the name of the city"
+              :class="[
+                apiError
+                  ? 'focus:border-gray-500 outline-none border-red-600 w-4/5 p-2.5 rounded-full bg-transparent border'
+                  : 'outline-none border border-gray-400 w-4/5 p-2.5 rounded-full bg-transparent',
+              ]"
+            />
+            <div v-if="closeSearch" class="submit" @click="chooseDelivery">
+              ENTER
+            </div>
+            <div
+              v-else
+              :class="[
+                apiError
+                  ? 'bg-red-to-transparent p-2.5 rounded-full lg:right-20p right-5p flex justify-end absolute cursor-pointer'
+                  : 'close cursor-pointer',
+              ]"
+              @click="clearSearch"
+            >
+              <close />
+            </div>
+          </form>
+          <p v-if="apiError" class="text-red-500 lg:text-start text-center mt-1">
+            We didn’t found such city. Please check spelling
+          </p>
+          <ul
+            v-if="cityName.length > 0"
+            class="w-[35%] md: w-[80%] bg-white text-start shadow-sm rounded-b-2xl overflow-hidden absolute"
+          >
+            <li
+              v-for="(city, index) in filteredCities"
+              class="border-b p-2 mx-4 cursor-pointer"
+              :key="index"
+              @click="setCity(city.name)"
+            >
+              {{ city.name }}
+            </li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-xl flex justify-start">Most popular cities</p>
+          <div class="main-list">
+            <table
+              class="border-separate border-spacing-x-8 border-spacing-y-4 w-3/4"
+            >
+              <tbody>
+                <tr
+                  v-for="(pair, index) in cityPairs"
+                  :key="index"
+                  class="gap-2"
+                >
+                  <td
+                    class="w-1/4 border-b text-start cursor-pointer pb-3 text-gray-400"
+                    @click="setCity(pair[0].name)"
+                  >
+                    {{ pair[0].name }}
+                  </td>
+                  <td
+                    class="w-1/4 border-b text-start cursor-pointer pb-3 text-gray-400"
+                    v-if="pair.length > 1"
+                    @click="setCity(pair[1].name)"
+                  >
+                    {{ pair[1].name }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="lg:flex md: hidden justify-evenly gap-10">
+          <div>
+            All rights reserved <br />
+            Fast service 2021
+          </div>
+          <footerIcons />
+        </div>
+      </div>
+      <div class="flex">
+        <div v-if="showOption" class="main-option">
+          <div v-if="apiResponse">
+            <div v-for="(delivery, index) in apiResponse" :key="index">
+              <deliver
+                :delivery-city="delivery.city"
+                :delivery-type="delivery.type"
+                :is-available="delivery.available"
+                :delivery-price="delivery.price"
+                :logo-path="getLogoPath(delivery.type)"
+              />
+            </div>
+          </div>
+          <banner v-else-if="apiError"/>
+        </div>
+        <banner v-else/>
+      </div>
+      <div class="flex flex-col-reverse gap-4 my-6 lg:hidden">
+        <div class="text-start">
+          All rights reserved <br />
+          Fast service 2021
+        </div>
+        <footerIcons />
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-}
 .main-info {
   width: 60vw;
   margin-left: 60px;
@@ -172,74 +242,6 @@ const getLogoPath = (type) => {
   width: 45vw;
   z-index: 3;
 }
-.main-cost {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  margin-bottom: 30px;
-}
-td{
-  cursor: pointer;
-}
-.big-text {
-  font-size: 42px;
-  font-weight: 700;
-  display: flex;
-  justify-content: flex-start;
-}
-.small-text {
-  font-size: 20px;
-  font-weight: 400;
-  display: flex;
-  justify-content: flex-start;
-}
-.main {
-  font-family: 'Roboto', sans-serif;
-  overflow: hidden;
-  overflow-y: hidden;
-  display: flex;
-  justify-content: space-between;
-  width: 100vw;
-  color: #283044;
-  background-color: #fff;
-}
-.main-logo {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  margin-bottom: 20px;
-  font-weight: 700;
-  font-size: 20px;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.main-icon {
-  height: 41px;
-  width: 41px;
-}
-.main-info {
-  height: 100vh;
-  width: 50%;
-}
-
-td {
-  padding-bottom: 15px;
-  color: rgba(40, 48, 68, 0.5);
-}
-.close{
-  background: linear-gradient(280deg, #65B3E4 15.15%, rgba(120, 161, 187, 0.00) 171.55%);
-  position: absolute;
-  right: 15%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 15px;
-  border-radius: 50%;
-}
-.close:hover{
-  opacity: 0.8;
-}
 .main-image {
   display: flex;
   justify-content: center;
@@ -250,60 +252,46 @@ td {
   width: 45vw;
   z-index: 3;
 }
-.image {
-  width: 45%;
-  position: relative;
-  top: 10%;
-  z-index: 3;
+.main {
+  font-family: "Roboto", sans-serif;
+  max-height: 100svh;
+  overflow-y: hidden;
+  display: flex;
+  justify-content: space-between;
+  color: #283044;
+  background-color: #fff;
 }
-.way {
-  position: relative;
+.main-info {
+  height: 100vh;
 }
-.line {
+.close {
+  background: linear-gradient(
+    280deg,
+    #65b3e4 15.15%,
+    rgba(120, 161, 187, 0) 171.55%
+  );
   position: absolute;
-  top: 55%;
-  right: 10%;
-}
-.road {
-  width: 85%;
-  position: absolute;
-  left: 30%;
-  z-index: -1;
-}
-.main-footer {
-  bottom: 0;
-}
-.main-search {
-  margin-bottom: 25px;
-}
-.input-form {
-  justify-content: flex-start;
-  position: relative;
+  right: 20%;
   display: flex;
   align-items: center;
-}
-input[type='text'] {
-  background-color: #fff;
-  width: 80%;
+  justify-content: center;
   padding: 10px;
-  font-weight: 700;
-  border: 1px solid #e9f0eb;
-  border-radius: 50px;
-  color: black;
-  font-size: 24px;
+  border-radius: 50%;
+}
+.close:hover {
+  opacity: 0.8;
 }
 .submit {
   cursor: pointer;
   color: #fff;
   display: flex;
   justify-content: center;
-  padding: 10px 24px;
-  width: 15%;
+  padding: 5px 24px;
   border: none;
   font-size: 24px;
   font-weight: 700;
   position: absolute;
-  right: 15%;
+  right: 20%;
   border-radius: 50px;
   background: linear-gradient(
     280deg,
@@ -311,82 +299,48 @@ input[type='text'] {
     rgba(120, 161, 187, 0) 171.55%
   );
 }
-.submit:hover{
+.submit:hover {
   opacity: 0.8;
 }
-input:focus {
-  outline: none; /* Remove the default outline */
-  border: none; /* Remove the border */
-  /* Add any other styling you want for the focused state */
-}
 .main-list {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   display: flex;
-  gap: 20px;
+  gap: 10px;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: center;
 }
-footer{
-  display: none;
-
-}
-@media (max-width: 850px) {
-  .main-info {
-    margin-left: 20px;
-    height: 100%;
-    width: 100%;
-}
+@media (max-width: 750px) {
   .main {
     flex-direction: column;
+    overflow-y: auto;
+    height: 100vh;
   }
-  input[type='text'] {
-  background-color: #fff;
-  width: 80%;
-  padding: 10px;
-  border: 1px solid #e9f0eb;
-  border-radius: 50px;
-  color: black;
-  font-size: 18px;
-}
-.submit{
-  font-size: 18px;
-}
-.close{
-  padding: 10px;
-}
+  .main-option {
+    width: 100%;
+  }
+  .main-info {
+    height: 100%;
+    width: 100%;
+    margin-left: 0px;
+  }
+  input[type="text"] {
+    width: 85%;
+  }
+  .submit {
+    font-size: 20px;
+    padding: 10px 14px;
+    right: 5%;
+  }
+  .close {
+    padding: 10px;
+  }
   .main-image {
     width: 100%;
     border-radius: 10% 10% 0 0;
   }
-  .image {
-    margin-top: 60px;
-    right: 15%;
-}
-.big-text {
-  font-size: 36px
-}
-.small-text {
-  font-size: 18px;
-}
-.road{
-  left: 30%;
-  margin-top: 30px;
-}
   .main-option {
     width: 100%;
-}
-.main-footer {
-  visibility: hidden;
-}
-footer{
-  padding: 10px;
-  display: flex;
-  text-align: start;
-  justify-content: flex-start;
-  align-items: center;
-  background-color: #fff;
-  color: #283044;
-}
+  }
 }
 </style>
