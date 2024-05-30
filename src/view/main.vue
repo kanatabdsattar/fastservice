@@ -3,7 +3,7 @@ import close from "../icons/closeIcon.vue";
 import deliver from "../components/deliver.vue";
 import banner from "../components/banner.vue";
 import footerIcons from "../components/footer-icons.vue";
-import  { useDeliveryStore }  from "../store/index.ts";
+import { useDeliveryStore } from "../store/index.ts";
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 const store = useDeliveryStore();
@@ -35,7 +35,7 @@ const setCity = (city: string) => {
   cityName.value = city;
   filteredCities.value = [];
 };
-type LogoType = 'pickup' | 'courier' | 'post';
+type LogoType = "pickup" | "courier" | "post";
 
 const getLogoPath = (type: LogoType): string => {
   const logoPaths: { [key in LogoType]: string } = {
@@ -51,7 +51,7 @@ interface City {
   name: string;
   alias: string;
 }
-const cities =ref<City[]>([
+const cities = ref<City[]>([
   { name: "Nur - Sultan", alias: "nur-sultan" },
   { name: "Aktau", alias: "aktau" },
   { name: "Almaty", alias: "almaty" },
@@ -95,7 +95,10 @@ const cityPairs = computed(() => {
           </p>
         </div>
         <div class="mb-8">
-          <form action="" class="flex lg:justify-start justify-center items-center relative">
+          <form
+            action=""
+            class="flex lg:justify-start justify-center items-center relative"
+          >
             <input
               type="text"
               v-model="cityName"
@@ -122,22 +125,27 @@ const cityPairs = computed(() => {
               <close />
             </div>
           </form>
-          <p v-if="apiError" class="text-red-500 lg:text-start text-center mt-1">
+          <p
+            v-if="apiError"
+            class="text-red-500 lg:text-start text-center mt-1"
+          >
             We didn’t found such city. Please check spelling
           </p>
-          <ul
-            v-if="cityName.length > 0"
-            class="w-[35%] md: w-[80%] bg-white text-start shadow-sm rounded-b-2xl overflow-hidden absolute"
-          >
-            <li
-              v-for="(city, index) in filteredCities"
-              class="border-b p-2 mx-4 cursor-pointer"
-              :key="index"
-              @click="setCity(city.name)"
+          <div class="w-full flex lg:justify-start justify-center">
+            <ul
+              v-if="cityName.length > 0"
+              class="lg:w-[35%] w-[80%] bg-white text-start shadow-sm rounded-b-2xl overflow-hidden absolute"
             >
-              {{ city.name }}
-            </li>
-          </ul>
+              <li
+                v-for="(city, index) in filteredCities"
+                class="border-b p-2 mx-4 cursor-pointer"
+                :key="index"
+                @click="setCity(city.name)"
+              >
+                {{ city.name }}
+              </li>
+            </ul>
+          </div>
         </div>
         <div>
           <p class="text-xl flex justify-start">Most popular cities</p>
@@ -190,9 +198,9 @@ const cityPairs = computed(() => {
               />
             </div>
           </div>
-          <banner v-else-if="apiError"/>
+          <banner v-else-if="apiError" />
         </div>
-        <banner v-else/>
+        <banner v-else />
       </div>
       <div class="flex flex-col-reverse gap-4 my-6 lg:hidden">
         <div class="text-start">
