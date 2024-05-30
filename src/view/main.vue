@@ -3,18 +3,14 @@ import close from "../icons/closeIcon.vue";
 import deliver from "../components/deliver.vue";
 import banner from "../components/banner.vue";
 import footerIcons from "../components/footer-icons.vue";
+import  { useDeliveryStore }  from "../store/index.ts";
 import { ref, computed } from "vue";
-import axios from "axios";
+import { storeToRefs } from "pinia";
+const store = useDeliveryStore();
+const { result } = storeToRefs(store);
+const { getDeliveryList } = store;
 const envUrl = import.meta.env.VITE_APP_API_URL
-const apiUrl = `${envUrl}/check`;
 const cityName = ref("");
-interface Delivery {
-  city: String;
-  type: String;
-  available: Boolean;
-  price: Number;
-}
-const apiResponse = ref();
 const apiError = ref(null);
 const showOption = ref(false);
 
@@ -26,29 +22,14 @@ const chooseDelivery = () => {
     closeSearch.value = !closeSearch.value;
   }
 };
-
 const fetchData = () => {
-  apiError.value = null;
-  apiResponse.value = null;
-  const cityQuery = encodeURIComponent(cityName.value.toLowerCase().replace(/\s+/g, ''));
-  const params = {
-    search: cityQuery,
-  };
-
-  axios
-    .get(apiUrl, { params })
-    .then((response) => {
-      apiResponse.value = response.data as Delivery;
-    })
-    .catch((error) => {
-      apiError.value = error;
-    });
+  getDeliveryList(cityName.value);
 };
 const closeSearch = ref(true);
 const clearSearch = () => {
   cityName.value = "";
   showOption.value = false;
-  apiResponse.value = null;
+  result.value = null;
   apiError.value = null;
   closeSearch.value = !closeSearch.value;
 };
@@ -200,8 +181,8 @@ const cityPairs = computed(() => {
       </div>
       <div class="flex">
         <div v-if="showOption" class="main-option">
-          <div v-if="apiResponse">
-            <div v-for="(delivery, index) in apiResponse" :key="index">
+          <div v-if="result">
+            <div v-for="(delivery, index) in result" :key="index">
               <deliver
                 :delivery-city="delivery.city"
                 :delivery-type="delivery.type"
