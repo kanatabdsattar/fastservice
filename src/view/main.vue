@@ -7,11 +7,9 @@ import  { useDeliveryStore }  from "../store/index.ts";
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 const store = useDeliveryStore();
-const { result } = storeToRefs(store);
+const { result, apiError } = storeToRefs(store);
 const { getDeliveryList } = store;
-const envUrl = import.meta.env.VITE_APP_API_URL
 const cityName = ref("");
-const apiError = ref(null);
 const showOption = ref(false);
 
 const chooseDelivery = () => {
