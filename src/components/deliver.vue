@@ -1,11 +1,11 @@
 <template>
-    <div class="main-block" @click="chosenDelivery" :class="{ 'disabled': !isAvailable }">
+    <div class="main-block w-1/4 bg-white flex justify-between rounded-xl mb-5" @click="chosenDelivery" :class="{ 'disabled': !isAvailable }">
         <div class="main-info">
             <p class="header">{{ props.deliveryType }}</p>
             <p class="price">{{ props.deliveryPrice.toFixed(2)}}$</p>
         </div>
         <div class="main-image">
-            <img :src="logoPath" class="icon" alt="Delivery Logo" />
+            <img :src="logoPath" class="w-4/5" alt="Delivery Logo" />
         </div>
         <div v-show="visible" class="chosen-type">
             <check/>
@@ -56,9 +56,6 @@ const chosenDelivery = () => {
     border-radius: 22px;
     border: 1px solid #E9F0EB;
     margin-bottom: 20px;
-}
-.icon{
-    width: 80%;
 }
 .disabled {
   opacity: 0.6; 
