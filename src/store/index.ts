@@ -11,7 +11,7 @@ export const useDeliveryStore = defineStore("delivery", () => {
   const result = ref<Delivery | null>(null);
   const apiError = ref();
   const envUrl = import.meta.env.VITE_APP_API_URL;
-  const apiUrl = `${envUrl}/check`;
+  const apiUrl = `${envUrl}`;
 
   async function getDeliveryList(city: string) {
     const cityQuery = encodeURIComponent(
